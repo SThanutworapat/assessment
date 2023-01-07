@@ -18,6 +18,10 @@ func NewHandler(e expense.DatabaseModelImpl) *handler {
 }
 
 func (h *handler) GetExpensesHandler(c echo.Context) error {
+	isAuth, returnError := CheckAuth(c)
+	if isAuth {
+		return returnError
+	}
 	stmt, err := h.Database.FindAll()
 	if err != nil {
 		return c.JSON(http.StatusAccepted, expense.Err{Message: "Prepare Fail"})
@@ -41,7 +45,12 @@ func (h *handler) GetExpensesHandler(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, expenseses)
 }
+
 func (h *handler) GetExpensesByIdHandler(c echo.Context) error {
+	isAuth, returnError := CheckAuth(c)
+	if isAuth {
+		return returnError
+	}
 	id := c.Param("id")
 	stmt, err := h.Database.FindByID()
 	if err != nil {
@@ -61,6 +70,10 @@ func (h *handler) GetExpensesByIdHandler(c echo.Context) error {
 	}
 }
 func (h *handler) PutExpensesByIdHandler(c echo.Context) error {
+	isAuth, returnError := CheckAuth(c)
+	if isAuth {
+		return returnError
+	}
 	id := c.Param("id")
 	var e expense.Expenses
 	err := c.Bind(&e)
@@ -77,10 +90,14 @@ func (h *handler) PutExpensesByIdHandler(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusConflict, expense.Err{Message: "can't scan id"})
 	}
-	return c.JSON(http.StatusCreated, e)
+	return c.JSON(http.StatusOK, e)
 }
 
 func (h *handler) CreateExpensesHandler(c echo.Context) error {
+	isAuth, returnError := CheckAuth(c)
+	if isAuth {
+		return returnError
+	}
 	var e expense.Expenses
 	err := c.Bind(&e)
 	if err != nil {
@@ -97,4 +114,11 @@ func (h *handler) CreateExpensesHandler(c echo.Context) error {
 		return c.JSON(http.StatusConflict, expense.Err{Message: "can't scan id"})
 	}
 	return c.JSON(http.StatusCreated, e)
+}
+
+func CheckAuth(c echo.Context) (bool, error) {
+	if c.Request().Header.Get("Authorization") != "November 10, 2009" {
+		return true, c.JSON(http.StatusUnauthorized, expense.Err{Message: "Unauthorized"})
+	}
+	return false, nil
 }

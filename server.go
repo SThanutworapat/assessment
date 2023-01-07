@@ -28,13 +28,6 @@ func main() {
 		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 	}))
 
-	// e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
-	// 	if username == "apidesign" || password == "4567" {
-	// 		return true, nil
-	// 	}
-	// 	return false, nil
-	// }))
-
 	// Routes
 	e.POST("/expenses", h.CreateExpensesHandler)
 	e.GET("/expenses", h.GetExpensesHandler)
