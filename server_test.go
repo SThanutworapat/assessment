@@ -14,6 +14,11 @@ import (
 )
 
 func TestGetAllExpenses(t *testing.T) {
+	done := make(chan bool)
+	go func() {
+		main()
+		done <- true
+	}()
 
 	seedUser(t)
 	var us []expense.Expenses
@@ -24,9 +29,17 @@ func TestGetAllExpenses(t *testing.T) {
 	assert.Nil(t, err)
 	assert.EqualValues(t, http.StatusOK, res.StatusCode)
 	assert.Greater(t, len(us), 0)
+
+	request(http.MethodPost, uri("quit"), nil)
 }
 
 func TestGetExpensesById(t *testing.T) {
+	done := make(chan bool)
+	go func() {
+		main()
+		done <- true
+	}()
+
 	c := seedUser(t)
 
 	var latest expense.Expenses
@@ -41,9 +54,17 @@ func TestGetExpensesById(t *testing.T) {
 	assert.NotEmpty(t, latest.Tags)
 	assert.NotEmpty(t, latest.Amount)
 	assert.NotEmpty(t, latest.Note)
+
+	request(http.MethodPost, uri("quit"), nil)
 }
 
 func TestCreateExpenses(t *testing.T) {
+	done := make(chan bool)
+	go func() {
+		main()
+		done <- true
+	}()
+
 	body := bytes.NewBufferString(`{
 		"title": "strawberry smoothie",
 		"amount": 79,
@@ -62,9 +83,17 @@ func TestCreateExpenses(t *testing.T) {
 	assert.Equal(t, 79.0, e.Amount)
 	assert.Equal(t, "night market promotion discount 10 bath", e.Note)
 	assert.Equal(t, []string{"food", "beverage"}, e.Tags)
+
+	request(http.MethodPost, uri("quit"), nil)
 }
 
 func TestUpdateExpenses(t *testing.T) {
+	done := make(chan bool)
+	go func() {
+		main()
+		done <- true
+	}()
+
 	c := seedUser(t)
 	body := bytes.NewBufferString(`{
 		"title": "apple smoothie",
@@ -85,6 +114,8 @@ func TestUpdateExpenses(t *testing.T) {
 	assert.Equal(t, 89.0, e.Amount)
 	assert.Equal(t, "no discount", e.Note)
 	assert.Equal(t, []string{"beverage"}, e.Tags)
+
+	request(http.MethodPost, uri("quit"), nil)
 }
 
 func seedUser(t *testing.T) expense.Expenses {
